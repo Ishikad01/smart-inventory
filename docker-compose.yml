@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo:6
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - inventory-network
+
+  backend:
+    build: ./backend
+    container_name: backend
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - MONGO_URI=mongodb://mongo:27017/inventoryDB
+      - JWT_SECRET=smartinventory2024secretkey
+    depends_on:
+      - mongo
+    networks:
+      - inventory-network
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - inventory-network
+
+volumes:
+  mongo-data:
+
+networks:
+  inventory-network:
+    driver: bridge
